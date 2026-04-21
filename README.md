@@ -15,7 +15,7 @@ Camera Image → YOLO Detection → Gap Analysis → Inventory Check → Restock
 ## Setup
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/supermarket-shelf-monitor.git
+git clone https://github.com/lukasomyr/supermarket-shelf-monitor.git
 cd supermarket-shelf-monitor
 pip install -r requirements.txt
 ```
