@@ -29,6 +29,10 @@ HARDWARE_MULTIPLIERS = {
     "Ruthenium":     0.95,  # estimated, no data
 }
 
+# Color multipliers intentionally NOT implemented:
+# Too few data points per color. Color differences are confounded
+# by leather type (e.g. Noir bags skewed by expensive Crocodile bags).
+
 
 def load_price_db():
     if not os.path.exists(PRICE_DB_PATH):
@@ -71,7 +75,7 @@ def estimate_price(model, size, leather, color, hardware=None, condition=None):
     hw_note = None
     if hardware:
         exact_hw = matches[matches["hardware"].str.lower() == hardware.lower()]
-        if len(exact_hw) >= 3:
+        if len(exact_hw) >= 1:
             matches = exact_hw
         else:
             dominant_hw = matches["hardware"].mode()[0] if not matches.empty else None
@@ -84,7 +88,7 @@ def estimate_price(model, size, leather, color, hardware=None, condition=None):
     cond_note = None
     if condition:
         exact_cond = matches[matches["condition"].str.lower() == condition.lower()]
-        if len(exact_cond) >= 3:
+        if len(exact_cond) >= 1:
             matches = exact_cond
         else:
             dominant_cond = matches["condition"].mode()[0] if not matches.empty else None
