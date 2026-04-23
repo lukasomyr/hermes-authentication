@@ -1,0 +1,87 @@
+model,size,leather,color,hardware,condition,price_eur
+Birkin,30,Barenia,Faubourg,Palladium,Box Fresh,25740.0
+Birkin,25,Togo,Biscuit,Gold,Box Fresh,28080.0
+Birkin,25,Epsom,Bleu Celeste,Palladium,Box Fresh,30420.0
+Birkin,25,Swift,Bleu Jean,Palladium,Box Fresh,28080.0
+Birkin,25,Alligator,Bleu Marine,Gold,Box Fresh,81900.0
+Birkin,25,Epsom,Bleu Royal,Palladium,Excellent,21060.0
+Birkin,25,Togo,Bleu Zanzibar,Gold,Box Fresh,25740.0
+Birkin,25,Crocodile,Bordeaux,Gold,Box Fresh,99450.0
+Birkin,25,Swift,Gold,Palladium,Box Fresh,42120.0
+Birkin,25,Epsom,Craie,Gold,Box Fresh,33930.0
+Birkin,25,Togo,Craie,Gold,Pre-Loved,17550.0
+Birkin,25,Togo,Etoupe,Gold,Pre-Loved,25740.0
+Birkin,25,Togo,Gris Pantin,Palladium,Box Fresh,29250.0
+Birkin,25,Epsom,Craie,Gold,Box Fresh,35100.0
+Birkin,25,Togo,Craie,Brushed Gold,Box Fresh,29835.0
+Birkin,25,Chevre,Vert Criquet,Brushed Gold,Box Fresh,30420.0
+Birkin,25,Crocodile,Havane,Gold,Box Fresh,70200.0
+Birkin,25,Crocodile,Himalaya,Palladium,Box Fresh,210600.0
+Birkin,25,Epsom,Noir,Gold,Pre-Loved,25740.0
+Birkin,25,Epsom,Noir,Rose Gold,Box Fresh,32760.0
+Birkin,25,Lizard,Noir,Gold,Box Fresh,81900.0
+Birkin,25,Madame,Noir,Palladium,Box Fresh,32760.0
+Birkin,25,Crocodile,Noir,Gold,Box Fresh,76050.0
+Birkin,25,Crocodile,Noir,Gold,Unworn,76050.0
+Birkin,25,Togo,Noir,Gold,Box Fresh,28665.0
+Birkin,25,Togo,Noir,Permabrass,Box Fresh,31590.0
+Birkin,25,Swift,Vert Criquet,Palladium,Box Fresh,72540.0
+Birkin,25,Togo,Plomb,Gold,Box Fresh,26910.0
+Birkin,25,Volupto,Noir,Palladium,Pre-Loved,58500.0
+Birkin,25,Ostrich,Rouge H,Palladium,Box Fresh,40950.0
+Birkin,25,Togo,Rouge H,Gold,Box Fresh,31590.0
+Birkin,25,Togo,Rouge Radieux,Palladium,Box Fresh,28080.0
+Birkin,25,Crocodile,Jaune Ambre,Palladium,Box Fresh,42120.0
+Birkin,25,Alligator,Noir,Rose Gold,Box Fresh,42120.0
+Birkin,25,Alligator,Rouge,Gold,Box Fresh,49140.0
+Birkin,25,Alligator,Gold,Gold,Box Fresh,42120.0
+Birkin,25,Ostrich,Vanille,Gold,Box Fresh,40950.0
+Birkin,25,Epsom,Vert Amande,Gold,Box Fresh,29250.0
+Birkin,25,Epsom,Vert Amande,Palladium,Box Fresh,28080.0
+Birkin,25,Epsom,Vert Criquet,Gold,Box Fresh,33930.0
+Birkin,25,Alligator,Vert Deau,Palladium,Box Fresh,65520.0
+Birkin,25,Swift,Vert Mangrove,Permabrass,Box Fresh,23400.0
+Birkin,25,Ostrich,Vert Verone,Palladium,Excellent,35100.0
+Birkin,25,Swift,Vert Vertigo,Gold,Box Fresh,22230.0
+Birkin,25,Epsom,Vert Yucca,Palladium,Box Fresh,28080.0
+Birkin,30,Epsom,Biscuit,Palladium,Box Fresh,29250.0
+Birkin,30,Swift,Bleu Glacier,Palladium,Box Fresh,29250.0
+Birkin,30,Togo,Bleu Jean,Palladium,Box Fresh,30420.0
+Birkin,30,Togo,Bleu Royal,Palladium,Box Fresh,18720.0
+Birkin,30,Crocodile,Bleu Tempete,Gold,Pre-Loved,42120.0
+Birkin,30,Crocodile,Bougainvillea,Palladium,Excellent,33930.0
+Birkin,30,Togo,Cabane,Palladium,Box Fresh,25740.0
+Birkin,30,Epsom,Brique,Palladium,Pre-Loved,18720.0
+Birkin,30,Epsom,Craie,Palladium,Box Fresh,26910.0
+Birkin,30,Togo,Craie,Gold,Pre-Loved,24570.0
+Birkin,30,Crocodile,Geranium,Gold,Excellent,44460.0
+Birkin,30,Crocodile,Graphite,Palladium,Excellent,44460.0
+Birkin,30,Epsom,Gris Etain,Gold,Box Fresh,29250.0
+Birkin,30,Togo,Gris Pantin,Palladium,Box Fresh,26910.0
+Birkin,30,Togo,Gris Plomb,Permabrass,Box Fresh,26910.0
+Birkin,30,Epsom,Rose Mexico,Brushed Gold,Box Fresh,29250.0
+Birkin,30,Epsom,Mauve Sylvester,Palladium,Box Fresh,30420.0
+Birkin,30,Togo,Mushroom,Gold,Box Fresh,22815.0
+Birkin,30,Clemence,Nata,Gold,Box Fresh,23400.0
+Birkin,30,Epsom,Noir,Gold,Pre-Loved,23400.0
+Birkin,30,Togo,Noir,Gold,Box Fresh,29250.0
+Birkin,30,Madame,Noir,Gold,Box Fresh,31590.0
+Birkin,30,Togo,Noir,Palladium,Pre-Loved,21060.0
+Birkin,30,Ardennes,Noisette,Palladium,Excellent,16380.0
+Birkin,30,Togo,Poussiere,Palladium,Box Fresh,25740.0
+Birkin,30,Crocodile,Raisin,Palladium,Excellent,42120.0
+Birkin,30,Gulliver,Gold,Gold,Excellent,18720.0
+Birkin,30,Togo,Rouge De Coeur,Palladium,Box Fresh,26910.0
+Birkin,30,Epsom,Rouge H,Gold,Excellent,26910.0
+Birkin,30,Togo,Rouge H,Gold,Pre-Loved,15795.0
+Birkin,30,Togo,Rouge H,Palladium,Box Fresh,30420.0
+Birkin,30,Crocodile,Noir,Rose Gold,Box Fresh,40950.0
+Birkin,30,Alligator,Noir,Gold,Box Fresh,39780.0
+Birkin,30,Togo,Trench,Palladium,Box Fresh,29250.0
+Birkin,35,Epsom,Candy Kiwi,Palladium,Pre-Loved,14040.0
+Birkin,35,Ostrich,Ebene,Palladium,Fair,21060.0
+Birkin,35,Crocodile,Fuchsia,Palladium,Pre-Loved,32760.0
+Birkin,35,Togo,Gold,Gold,Pre-Loved,16380.0
+Birkin,35,Togo,Gris Perle,Gold,Box Fresh,23400.0
+Birkin,35,Crocodile,Noir,Palladium,Excellent,35100.0
+Birkin,35,Clemence,White,Palladium,Pre-Loved,9945.0
