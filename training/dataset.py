@@ -4,7 +4,7 @@ PyTorch Dataset with augmentation transforms.
 
 from torchvision import datasets, transforms
 from torch.utils.data import DataLoader
-import config
+import training.config as config
 
 IMAGENET_MEAN = [0.485, 0.456, 0.406]
 IMAGENET_STD = [0.229, 0.224, 0.225]

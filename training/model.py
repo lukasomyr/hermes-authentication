@@ -5,7 +5,7 @@ EfficientNet-B0 with custom classifier head for binary classification.
 import torch
 import torch.nn as nn
 from torchvision import models
-import config
+import training.config as config
 
 
 def build_model(pretrained=True):

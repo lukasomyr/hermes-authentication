@@ -9,9 +9,9 @@ import seaborn as sns
 import torch
 from sklearn.metrics import classification_report, confusion_matrix
 
-import config
-from dataset import get_dataloaders, IMAGENET_MEAN, IMAGENET_STD
-from model import build_model
+import training.config as config
+from training.dataset import get_dataloaders, IMAGENET_MEAN, IMAGENET_STD
+from training.model import build_model
 
 
 def denormalize(tensor):

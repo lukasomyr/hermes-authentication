@@ -10,10 +10,10 @@ import numpy as np
 # =============================================================
 # ⚠️  UPDATE THIS PATH to match your Kaggle dataset
 # =============================================================
-RAW_DATA_DIR = "/kaggle/input/datasets/ignaciouriz/hermesbags/Dataset" # ← CHANGE THIS
+RAW_DATA_DIR = "/Users/ignaciouriz/Documents/IE/YEAR II/YEAR III/SEM II/AI/Hermes Authenticator/Dataset" # ← CHANGE THIS
 
-PROCESSED_DATA_DIR = "/kaggle/working/data/processed"
-OUTPUT_DIR = "/kaggle/working/outputs"
+PROCESSED_DATA_DIR = "/Users/ignaciouriz/Documents/IE/YEAR II/YEAR III/SEM II/AI/Hermes Authenticator/Processed_Dataset"
+OUTPUT_DIR = "/Users/ignaciouriz/Documents/IE/YEAR II/YEAR III/SEM II/AI/Hermes Authenticator/Outputs"
 
 TRAIN_DIR = os.path.join(PROCESSED_DATA_DIR, "train")
 VAL_DIR = os.path.join(PROCESSED_DATA_DIR, "val")
@@ -44,7 +44,7 @@ CLASS_NAMES = ["Fake", "Real"]
 NUM_CLASSES = 2
 
 # Device
-DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+DEVICE = torch.device("mps" if torch.backends.mps.is_available() else "cpu")
 
 # Reproducibility
 SEED = 42

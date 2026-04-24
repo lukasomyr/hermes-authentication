@@ -8,10 +8,10 @@ import matplotlib.pyplot as plt
 from PIL import Image
 import torch.nn.functional as F
 
-import config
-from model import build_model
-from inference import preprocess_image
-from dataset import IMAGENET_MEAN, IMAGENET_STD
+import training.config as config
+from training.model import build_model
+from training.inference import preprocess_image
+from training.dataset import IMAGENET_MEAN, IMAGENET_STD
 
 
 def generate_gradcam(model, image_tensor, target_class=None):

@@ -7,9 +7,9 @@ import torch
 from PIL import Image
 from rembg import remove
 
-import config
-from dataset import get_eval_transforms
-from model import build_model
+import training.config as config
+from training.dataset import get_eval_transforms
+from training.model import build_model
 
 
 def preprocess_image(image_path):
@@ -46,7 +46,7 @@ def main():
 
     print(f"\n  Prediction: {pred.upper()}")
     print(f"  Confidence: {conf:.1%}")
-    if pred == "fake":
+    if pred.lower() == "fake":
         print("  Warning: This bag shows signs of being counterfeit.")
     else:
         print("  This bag appears authentic (screening only).")
