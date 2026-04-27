@@ -14,19 +14,26 @@ git clone https://github.com/lukasomyr/hermes-authentication.git
 cd hermes-authentication
 ```
 
-### 2. Install dependencies
+### 2. Create a virtual environment (recommended)
+```bash
+python3 -m venv venv
+source venv/bin/activate  # Mac/Linux
+# or: venv\Scripts\activate  # Windows
+```
+
+### 3. Install dependencies
 ```bash
 pip install -r requirements.txt
 ```
 
-### 3. Download the trained model
+### 4. Download the trained model
 Download `best_model.pth` from [Google Drive](https://drive.google.com/file/d/1dkEI1XgoDN41-h8XoHlCxZIqIYe6fOn1/view?usp=sharing) and place it in the root folder:
 ```
 hermes-authentication/
 └── best_model.pth
 ```
 
-### 4. Run the demo
+### 5. Run the demo
 ```bash
 uvicorn app:app --reload --port 8000
 ```
