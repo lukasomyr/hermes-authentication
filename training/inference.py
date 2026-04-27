@@ -7,9 +7,9 @@ import torch
 from PIL import Image
 from rembg import remove
 
-import training.config as config
-from training.dataset import get_eval_transforms
-from training.model import build_model
+import config
+from dataset import get_eval_transforms
+from model import build_model
 
 
 def preprocess_image(image_path):

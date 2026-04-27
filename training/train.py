@@ -9,9 +9,9 @@ import torch
 import torch.nn as nn
 from tqdm import tqdm
 
-import training.config as config
-from training.dataset import get_dataloaders
-from training.model import build_model, unfreeze_backbone, get_optimizer
+import config
+from dataset import get_dataloaders
+from model import build_model, unfreeze_backbone, get_optimizer
 
 
 def train_one_epoch(model, loader, criterion, optimizer, device):

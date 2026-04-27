@@ -9,7 +9,7 @@ from PIL import Image
 from rembg import remove, new_session
 from sklearn.model_selection import train_test_split
 from tqdm import tqdm
-import training.config as config
+import config
 
 # Persistent cache of processed images (survives re-runs)
 CACHE_DIR = os.path.join(config.PROCESSED_DATA_DIR, "_cache")

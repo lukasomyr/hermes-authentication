@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Hermès Authenticator</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+  :root{
+    --bg:#f7f4ef;
+    --ink:#1a1a1a;
+    --muted:#6b6257;
+    --accent:#7a5a2b;
+    --accent-dark:#4a3919;
+    --real:#2f8f4e;
+    --fake:#c0392b;
+    --warn:#d98e27;
+    --card:#ffffff;
+    --line:#e7e0d3;
+    --soft:#faf6ee;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:'Helvetica Neue', Arial, sans-serif;background:var(--bg);color:var(--ink);line-height:1.5;}
+  header{padding:22px 48px;border-bottom:1px solid var(--line);background:#fff;display:flex;justify-content:space-between;align-items:center;}
+  .brand{font-family:'Georgia', serif;font-size:22px;letter-spacing:3px;color:var(--accent-dark);}
+  .brand span{color:var(--accent);font-weight:bold}
+  nav a{margin-left:24px;text-decoration:none;color:var(--muted);font-size:13px;letter-spacing:1px;text-transform:uppercase;cursor:pointer;}
+  nav a.active{color:var(--accent-dark);border-bottom:1px solid var(--accent)}
+  main{max-width:1180px;margin:0 auto;padding:32px 48px}
+  .hero{text-align:center;margin-bottom:28px}
+  .hero h1{font-family:Georgia,serif;font-size:38px;margin:0 0 8px 0;color:var(--accent-dark);font-weight:normal;}
+  .hero p{color:var(--muted);max-width:640px;margin:0 auto;font-size:14px}
+  .status{display:inline-flex;gap:8px;align-items:center;margin-top:14px;font-size:12px;color:var(--muted);background:#fff;padding:6px 14px;border-radius:20px;border:1px solid var(--line);}
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--real);display:inline-block;animation:pulse 2s infinite}
+  .dot.offline{background:var(--fake);animation:none}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+  .flow{display:flex;justify-content:space-between;margin:18px 0 32px 0;gap:8px;}
+  .step{flex:1;text-align:center;padding:14px 8px;background:#fff;border:1px solid var(--line);border-radius:6px;font-size:12px;transition:all .25s;}
+  .step .num{background:var(--accent);color:#fff;width:24px;height:24px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:bold;margin-bottom:6px;}
+  .step .name{font-weight:600;color:var(--ink);display:block;margin-top:3px}
+  .step .detail{color:var(--muted);font-size:11px;margin-top:2px;display:block}
+  .step.active{border-color:var(--accent);background:#fdfaf3}
+  .step.done{border-color:var(--real);background:#f3faf5}
+  .step.done .num{background:var(--real)}
+  .arrow{align-self:center;color:var(--muted);font-size:18px}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:24px;box-shadow:0 1px 3px rgba(0,0,0,0.03);}
+  .card h2{margin:0 0 14px 0;font-family:Georgia,serif;font-size:18px;color:var(--accent-dark);font-weight:normal;border-bottom:1px solid var(--line);padding-bottom:8px;display:flex;justify-content:space-between;align-items:center;}
+  .card h2 .count{font-size:11px;color:var(--muted);font-family:Helvetica,sans-serif;letter-spacing:1px;}
+  .dropzone{border:2px dashed var(--accent);border-radius:6px;padding:48px 20px;text-align:center;background:#fdfaf3;cursor:pointer;transition:background .2s;}
+  .dropzone:hover, .dropzone.drag{background:#f5ecd6}
+  .dropzone.has-file{padding:14px;background:#fff}
+  .dropzone .icon{font-size:42px;color:var(--accent)}
+  .dropzone p{margin:6px 0 4px 0;font-size:14px}
+  .dropzone small{color:var(--muted);font-size:11px}
+  .dz-preview{max-height:220px;border-radius:4px;border:1px solid var(--line);object-fit:contain;background:#fdfaf3;width:100%;}
+  .dz-filename{font-size:12px;color:var(--muted);margin-top:6px}
+  .btn{display:inline-block;padding:11px 22px;border:none;background:var(--accent-dark);color:#fff;border-radius:4px;font-size:12px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;font-family:inherit;}
+  .btn.secondary{background:transparent;color:var(--accent-dark);border:1px solid var(--accent-dark)}
+  .btn:disabled{opacity:.4;cursor:not-allowed}
+  .tip{margin-top:16px;background:#fef8e5;border-left:3px solid var(--warn);padding:10px 14px;font-size:12px;color:#6b5a1b;border-radius:4px;}
+  .tip.error{background:#fbe9e7;border-left-color:var(--fake);color:#7a2a20}
+  .verdict{display:flex;align-items:center;gap:16px;padding:18px;border-radius:6px;margin-bottom:18px;}
+  .verdict.real{background:#e8f5ec;border:1px solid var(--real)}
+  .verdict.fake{background:#fbe9e7;border:1px solid var(--fake)}
+  .verdict.idle{background:#faf6ee;border:1px dashed var(--line)}
+  .verdict.idle h3, .verdict.idle p{color:var(--muted)}
+  .verdict.idle .badge{background:#e7e0d3;color:#fff}
+  .verdict .badge{font-size:34px;width:58px;height:58px;border-radius:50%;background:var(--real);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:bold;flex-shrink:0;}
+  .verdict.fake .badge{background:var(--fake)}
+  .verdict h3{margin:0;color:var(--real);font-size:22px;font-family:Georgia,serif}
+  .verdict.fake h3{color:var(--fake)}
+  .verdict p{margin:2px 0 0 0;color:var(--muted);font-size:12px}
+  .confidence{margin-bottom:18px}
+  .confidence label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+  .bar{height:10px;background:#eee;border-radius:5px;overflow:hidden;margin-top:6px;position:relative}
+  .bar > div{height:100%;width:0;background:linear-gradient(90deg,var(--real),#5cb780);transition:width .6s}
+  .bar.fake > div{background:linear-gradient(90deg,var(--fake),#e67a6f)}
+  .confidence .val{float:right;font-weight:bold;font-size:14px;color:var(--real)}
+  .confidence.fake .val{color:var(--fake)}
+  .price-box{margin:16px 0 0 0;padding:14px;background:var(--soft);border-radius:5px;border:1px solid var(--line);}
+  .price-box .price-title{font-size:11px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;display:flex;align-items:baseline;justify-content:space-between;margin-bottom:10px;}
+  .price-box .price-title small{font-size:10px;text-transform:none;letter-spacing:0;color:var(--muted)}
+  .price-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  .price-grid label{font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;display:block;margin-bottom:3px;}
+  .price-grid select,.price-grid input{width:100%;padding:7px 8px;border:1px solid var(--line);border-radius:4px;font-size:13px;font-family:inherit;background:#fff;box-sizing:border-box;}
+  .price-grid select:focus,.price-grid input:focus{outline:none;border-color:var(--accent);}
+  .price-actions{display:flex;gap:8px;margin-top:10px;align-items:center;}
+  .btn-estimate{padding:8px 14px;background:var(--accent-dark);color:#fff;border:none;border-radius:4px;font-size:12px;letter-spacing:1px;text-transform:uppercase;cursor:pointer;font-family:inherit;transition:background .15s;}
+  .btn-estimate:hover:not(:disabled){background:#5e4a1f;}
+  .btn-estimate:disabled{opacity:.5;cursor:not-allowed;}
+  .price-result{margin-top:12px;padding:10px 12px;background:#fff;border:1px solid var(--line);border-radius:4px;font-size:12px;display:none;}
+  .price-result.show{display:block;}
+  .price-result.error{background:#fbe9e7;border-color:#e6b4ad;color:#8b3a2e;}
+  .price-result .range{display:flex;justify-content:space-between;align-items:center;font-family:Georgia,serif;font-size:14px;color:var(--accent-dark);margin-bottom:4px;}
+  .price-result .range strong{font-size:18px;color:var(--accent-dark);}
+  .price-result .meta{font-size:11px;color:var(--muted);margin-top:4px;}
+  .price-result .note{font-size:10px;color:var(--muted);font-style:italic;margin-top:3px;}
+  .price-hint{font-size:10px;color:var(--muted);margin-top:8px;font-style:italic;}
+  .gc-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:10px;}
+  .gc-box{position:relative;aspect-ratio:1;background:#f0e9d8;border-radius:4px;overflow:hidden;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;}
+  .gc-box img{width:100%;height:100%;object-fit:cover}
+  .gc-box .bag{font-size:68px;filter:drop-shadow(0 4px 4px rgba(0,0,0,.15))}
+  .gc-box.placeholder{background:#1a1a3a}
+  .gc-box.placeholder::after{content:"awaiting analysis";color:#fff8;font-size:11px;letter-spacing:2px;text-transform:uppercase}
+  .gc-label{position:absolute;bottom:6px;left:6px;background:rgba(0,0,0,.7);color:#fff;padding:2px 8px;font-size:10px;border-radius:2px;letter-spacing:1px;text-transform:uppercase;z-index:2}
+  .alt-section{margin-top:40px}
+  .alt-section > h2{font-family:Georgia,serif;color:var(--accent-dark);border-bottom:1px solid var(--line);padding-bottom:8px;font-weight:normal;font-size:22px;}
+  .history{margin-top:40px;background:#fff;border:1px solid var(--line);border-radius:8px;overflow:hidden;}
+  .history h2{margin:0;padding:18px 24px;border-bottom:1px solid var(--line);font-family:Georgia,serif;font-weight:normal;color:var(--accent-dark);font-size:18px;}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th{text-align:left;padding:10px 24px;background:#faf6ee;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:1px;font-weight:500}
+  td{padding:10px 24px;border-top:1px solid var(--line);vertical-align:middle}
+  .hist-thumb{width:36px;height:36px;border-radius:4px;border:1px solid var(--line);object-fit:cover;background:#faf6ee}
+  .pill{padding:3px 10px;border-radius:12px;font-size:11px;font-weight:500}
+  .pill.real{background:#e8f5ec;color:var(--real)}
+  .pill.fake{background:#fbe9e7;color:var(--fake)}
+  .empty-row td{color:var(--muted);text-align:center;font-style:italic}
+  .spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(0,0,0,.1);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;vertical-align:middle;margin-right:6px;}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  footer{text-align:center;padding:40px 20px;color:var(--muted);font-size:12px;border-top:1px solid var(--line);margin-top:60px}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">HERMÈS<span>·</span>AUTH</div>
+  <nav>
+    <a href="#" class="active">Authenticate</a>
+    <a href="#history">History</a>
+  </nav>
+</header>
+
+<main>
+  <div class="hero">
+    <h1>Is your Birkin authentic?</h1>
+    <p>Upload a clear photo of your Hermès Birkin and receive an instant authenticity assessment, a visual inspection report, and a downloadable certificate.</p>
+    <div class="status">
+      <span class="dot" id="status-dot"></span>
+      <span id="status-text">Connecting…</span>
+    </div>
+  </div>
+
+  <div class="flow" id="pipeline">
+    <div class="step" data-step="1"><div class="num">1</div><span class="name">Upload Photo</span><span class="detail">JPG / PNG / WEBP</span></div>
+    <div class="arrow">→</div>
+    <div class="step" data-step="2"><div class="num">2</div><span class="name">Analysis</span><span class="detail">Visual inspection</span></div>
+    <div class="arrow">→</div>
+    <div class="step" data-step="3"><div class="num">3</div><span class="name">Verdict</span><span class="detail">Authentic / Counterfeit</span></div>
+    <div class="arrow">→</div>
+    <div class="step" data-step="4"><div class="num">4</div><span class="name">Report</span><span class="detail">Downloadable PDF</span></div>
+  </div>
+
+  <div class="grid">
+
+    <div class="card">
+      <h2>Upload <span class="count">Single image</span></h2>
+
+      <div class="dropzone" id="dropzone">
+        <div id="dz-empty">
+          <div class="icon">⬆</div>
+          <p><strong>Drag &amp; drop your photo</strong></p>
+          <small>JPG / PNG / WEBP · max 10 MB · clear, well-lit shot of the bag</small>
+          <br/><br/>
+          <button class="btn" type="button" id="dz-pick">Select image</button>
+        </div>
+        <div id="dz-loaded" style="display:none">
+          <img class="dz-preview" id="dz-img" alt="selected"/>
+          <div class="dz-filename" id="dz-name"></div>
+        </div>
+        <input type="file" id="file-input" accept="image/*" hidden/>
+      </div>
+
+      <div class="tip" id="tip">
+        💡 <strong>Best results:</strong> single bag centered in frame, natural lighting, no filters. Front-facing shots typically yield the most accurate assessment.
+      </div>
+
+      <div style="margin-top:18px;display:flex;justify-content:space-between;gap:10px">
+        <button class="btn secondary" id="clear-btn">Clear</button>
+        <button class="btn" id="run-btn" disabled>Run Authentication →</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Verdict <span class="count" id="latency-label">Idle</span></h2>
+
+      <div class="verdict idle" id="verdict">
+        <div class="badge" id="verdict-badge">?</div>
+        <div>
+          <h3 id="verdict-title">No image yet</h3>
+          <p id="verdict-text">Upload a Birkin photo and run authentication to see the verdict.</p>
+        </div>
+      </div>
+
+      <div class="confidence" id="confidence">
+        <label>Confidence Score <span class="val" id="conf-val">—</span></label>
+        <div class="bar"><div id="conf-bar"></div></div>
+      </div>
+
+      <div class="price-box">
+        <div class="price-title">
+          <span>Market Value Estimate</span>
+          <small>Based on real Love Luxury listings</small>
+        </div>
+        <div class="price-grid">
+          <div>
+            <label for="pe-model">Model</label>
+            <select id="pe-model">
+              <option value="Birkin">Birkin</option>
+            </select>
+          </div>
+          <div>
+            <label for="pe-size">Size</label>
+            <select id="pe-size">
+              <option value="">—</option>
+              <option value="25">25</option>
+              <option value="30">30</option>
+              <option value="35">35</option>
+            </select>
+          </div>
+          <div>
+            <label for="pe-leather">Leather</label>
+            <select id="pe-leather">
+              <option value="">—</option>
+              <option>Togo</option>
+              <option>Epsom</option>
+              <option>Clemence</option>
+              <option>Swift</option>
+              <option>Chevre</option>
+              <option>Barenia</option>
+              <option>Madame</option>
+              <option>Volupto</option>
+              <option>Ardennes</option>
+              <option>Gulliver</option>
+              <option>Crocodile</option>
+              <option>Alligator</option>
+              <option>Lizard</option>
+              <option>Ostrich</option>
+            </select>
+          </div>
+          <div>
+            <label for="pe-color">Color</label>
+            <input id="pe-color" list="pe-color-list" placeholder="e.g. Noir" autocomplete="off"/>
+            <datalist id="pe-color-list">
+              <option value="Noir"></option><option value="Craie"></option>
+              <option value="Etoupe"></option><option value="Gold"></option>
+              <option value="Rouge H"></option><option value="Bleu Royal"></option>
+              <option value="Bleu Jean"></option><option value="Vert Criquet"></option>
+              <option value="Vert Amande"></option><option value="Bleu Celeste"></option>
+              <option value="Biscuit"></option><option value="Gris Pantin"></option>
+              <option value="Bordeaux"></option><option value="Vanille"></option>
+              <option value="Trench"></option><option value="Himalaya"></option>
+              <option value="Mauve Sylvester"></option><option value="Bleu Tempete"></option>
+              <option value="Brique"></option><option value="White"></option>
+            </datalist>
+          </div>
+          <div>
+            <label for="pe-hardware">Hardware</label>
+            <select id="pe-hardware">
+              <option value="">— (auto)</option>
+              <option>Gold</option>
+              <option>Palladium</option>
+              <option>Rose Gold</option>
+              <option>Brushed Gold</option>
+              <option>Permabrass</option>
+              <option>Ruthenium</option>
+            </select>
+          </div>
+          <div>
+            <label for="pe-condition">Condition</label>
+            <select id="pe-condition">
+              <option value="">— (auto)</option>
+              <option>Box Fresh</option>
+              <option>Unworn</option>
+              <option>Excellent</option>
+              <option>Pre-Loved</option>
+              <option>Good</option>
+              <option>Fair</option>
+            </select>
+          </div>
+        </div>
+        <div class="price-actions">
+          <button class="btn-estimate" id="btn-estimate" type="button">Estimate price</button>
+          <span id="pe-status" style="font-size:11px;color:var(--muted);"></span>
+        </div>
+        <div class="price-result" id="pe-result"></div>
+        <div class="price-hint">Estimates are EUR resale ranges (25th–75th percentile of comparable listings). Hardware and condition multipliers are applied when an exact match isn't available.</div>
+      </div>
+
+      <div style="display:flex;gap:10px;margin-top:18px">
+        <button class="btn secondary" style="flex:1" id="scroll-gc">View Inspection ↓</button>
+        <button class="btn" style="flex:1" id="dl-report" disabled>Generate PDF Report</button>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="alt-section" id="gradcam-section">
+    <h2>Inspection · Where we looked</h2>
+    <p style="color:var(--muted);font-size:13px;margin:6px 0 4px 0">A visual map of the regions our system focused on when reaching the verdict. Warmer colors (red / yellow) indicate areas that influenced the decision most strongly; cooler colors (blue) indicate areas with little influence.</p>
+    <div class="gc-row">
+      <div class="gc-box" id="gc-original"><span class="bag">👜</span><div class="gc-label">Original Image</div></div>
+      <div class="gc-box placeholder" id="gc-heatmap"><div class="gc-label">Inspection Map</div></div>
+      <div class="gc-box" id="gc-overlay"><span class="bag">👜</span><div class="gc-label" id="gc-overlay-label">Overlay</div></div>
+    </div>
+  </div>
+
+  <div class="history" id="history">
+    <h2>Recent authentications</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Preview</th>
+          <th>Timestamp</th>
+          <th>Verdict</th>
+          <th>Confidence</th>
+          <th>Estimated Value</th>
+          <th>File</th>
+        </tr>
+      </thead>
+      <tbody id="history-body">
+        <tr class="empty-row"><td colspan="6">No authentications yet. Upload an image to begin.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</main>
+
+<footer>
+  Hermès·Auth · Confidential authentication screening · 2026<br/>
+  This service provides a screening assessment only and is not a substitute for in-person professional authentication for high-value transactions.
+</footer>
+
+<script>
+const $ = (id) => document.getElementById(id);
+
+const state = {
+  file: null,
+  lastResult: null,
+  refId: null,
+  priceEstimate: null,   // { low, mid, high, comparables, multiplier, notes, query: {...} }
+};
+
+function fmtEUR(n){
+  if(n == null || isNaN(n)) return "—";
+  return "€" + Number(n).toLocaleString();
+}
+
+function clearPriceResult(){
+  state.priceEstimate = null;
+  const el = $("pe-result");
+  el.className = "price-result";
+  el.innerHTML = "";
+  $("pe-status").textContent = "";
+}
+
+async function runEstimate(){
+  const model    = $("pe-model").value.trim();
+  const size     = $("pe-size").value.trim();
+  const leather  = $("pe-leather").value.trim();
+  const color    = $("pe-color").value.trim();
+  const hardware = $("pe-hardware").value.trim() || null;
+  const condition= $("pe-condition").value.trim() || null;
+
+  if(!model || !size || !leather || !color){
+    $("pe-status").textContent = "Fill in model, size, leather and color.";
+    $("pe-status").style.color = "var(--fake)";
+    return;
+  }
+  $("pe-status").style.color = "var(--muted)";
+  $("pe-status").innerHTML = `<span class="spinner"></span>Looking up comparables…`;
+  const btn = $("btn-estimate");
+  btn.disabled = true;
+
+  try {
+    const r = await fetch("/api/estimate_price", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({ model, size, leather, color, hardware, condition }),
+    });
+    const j = await r.json();
+    if(!r.ok){
+      throw new Error(j.detail || `HTTP ${r.status}`);
+    }
+
+    const el = $("pe-result");
+    if(j.error){
+      el.className = "price-result show error";
+      el.innerHTML = `⚠ ${j.error}${j.comparables === 0 ? " — try a more common leather/color or leave hardware/condition blank." : ""}`;
+      state.priceEstimate = null;
+    } else {
+      el.className = "price-result show";
+      const noteHtml = (j.notes || []).map(n => `<div class="note">${n}</div>`).join("");
+      el.innerHTML = `
+        <div class="range">
+          <span>Low <strong>${fmtEUR(j.low)}</strong></span>
+          <span>Mid <strong>${fmtEUR(j.mid)}</strong></span>
+          <span>High <strong>${fmtEUR(j.high)}</strong></span>
+        </div>
+        <div class="meta">Based on ${j.comparables} comparable listing${j.comparables===1?"":"s"} · multiplier ×${j.multiplier ?? 1}</div>
+        ${noteHtml}
+      `;
+      state.priceEstimate = {
+        ...j,
+        query: { model, size, leather, color, hardware, condition },
+      };
+    }
+    $("pe-status").textContent = "";
+  } catch (e) {
+    const el = $("pe-result");
+    el.className = "price-result show error";
+    el.innerHTML = `⚠ ${e.message || "Estimate failed."}`;
+    state.priceEstimate = null;
+    $("pe-status").textContent = "";
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  const btn = document.getElementById("btn-estimate");
+  if (btn) btn.addEventListener("click", runEstimate);
+});
+
+function genRefId(){
+  const t = new Date();
+  const pad = (n) => String(n).padStart(2,"0");
+  const rand = Math.random().toString(36).slice(2,6).toUpperCase();
+  return `HA-${t.getFullYear()}${pad(t.getMonth()+1)}${pad(t.getDate())}-${pad(t.getHours())}${pad(t.getMinutes())}${pad(t.getSeconds())}-${rand}`;
+}
+
+// ----- Backend health check on load -----
+async function checkHealth(){
+  try{
+    const r = await fetch("/api/health");
+    const j = await r.json();
+    if(j.model_path){
+      $("status-dot").classList.remove("offline");
+      $("status-text").textContent = "Service online · Ready to authenticate";
+    } else {
+      $("status-dot").classList.add("offline");
+      $("status-text").textContent = "Service unavailable. Please try again later.";
+    }
+  } catch(e){
+    $("status-dot").classList.add("offline");
+    $("status-text").textContent = "Service unreachable. Please try again later.";
+  }
+}
+checkHealth();
+
+// ----- Drag & drop / file picking -----
+const dz = $("dropzone");
+const fi = $("file-input");
+$("dz-pick").addEventListener("click", (e) => { e.stopPropagation(); fi.click(); });
+dz.addEventListener("click", () => fi.click());
+dz.addEventListener("dragover", (e) => { e.preventDefault(); dz.classList.add("drag"); });
+dz.addEventListener("dragleave", () => dz.classList.remove("drag"));
+dz.addEventListener("drop", (e) => {
+  e.preventDefault();
+  dz.classList.remove("drag");
+  if(e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+});
+fi.addEventListener("change", (e) => {
+  if(e.target.files.length) handleFile(e.target.files[0]);
+});
+
+function handleFile(f){
+  if(!f.type.startsWith("image/")){
+    showError("That file isn't an image.");
+    return;
+  }
+  if(f.size > 10 * 1024 * 1024){
+    showError("File is larger than 10 MB.");
+    return;
+  }
+  state.file = f;
+  const url = URL.createObjectURL(f);
+  $("dz-empty").style.display = "none";
+  $("dz-loaded").style.display = "block";
+  $("dz-img").src = url;
+  $("dz-name").textContent = `${f.name} · ${(f.size/1024).toFixed(0)} KB`;
+  dz.classList.add("has-file");
+  $("run-btn").disabled = false;
+  setStep(1, "done");
+  setStep(2, ""); setStep(3, ""); setStep(4, "");
+  $("tip").className = "tip";
+  $("tip").innerHTML = `💡 Image loaded. Click <strong>Run Authentication</strong> to begin the assessment.`;
+}
+
+// ----- Pipeline UI -----
+function setStep(n, cls){
+  const el = document.querySelector(`.step[data-step="${n}"]`);
+  if(!el) return;
+  el.classList.remove("active", "done");
+  if(cls) el.classList.add(cls);
+}
+
+function showError(msg){
+  $("tip").className = "tip error";
+  $("tip").innerHTML = `⚠ <strong>Error:</strong> ${msg}`;
+}
+
+// ----- Clear -----
+$("clear-btn").addEventListener("click", () => {
+  state.file = null;
+  state.lastResult = null;
+  state.refId = null;
+  fi.value = "";
+  $("dz-empty").style.display = "";
+  $("dz-loaded").style.display = "none";
+  dz.classList.remove("has-file");
+  ["pe-size","pe-leather","pe-color","pe-hardware","pe-condition"].forEach(id => { const el = $(id); if(el) el.value = ""; });
+  clearPriceResult();
+  resetVerdict();
+  $("run-btn").disabled = true;
+  $("dl-report").disabled = true;
+  ["1","2","3","4"].forEach(n => setStep(n, ""));
+  $("tip").className = "tip";
+  $("tip").innerHTML = `💡 <strong>Best results:</strong> single bag centered in frame, natural lighting, no filters. Front-facing shots typically yield the most accurate assessment.`;
+});
+
+function resetVerdict(){
+  const v = $("verdict");
+  v.className = "verdict idle";
+  $("verdict-badge").textContent = "?";
+  $("verdict-title").textContent = "No image yet";
+  $("verdict-text").textContent = "Upload a Birkin photo and run authentication to see the verdict.";
+  $("conf-val").textContent = "—";
+  $("conf-val").style.color = "";
+  $("conf-bar").style.width = "0%";
+  $("confidence").classList.remove("fake");
+  document.querySelector("#confidence .bar").classList.remove("fake");
+  $("latency-label").textContent = "Idle";
+  $("gc-original").innerHTML = `<span class="bag">👜</span><div class="gc-label">Original Image</div>`;
+  $("gc-heatmap").className = "gc-box placeholder";
+  $("gc-heatmap").innerHTML = `<div class="gc-label">Inspection Map</div>`;
+  $("gc-overlay").innerHTML = `<span class="bag">👜</span><div class="gc-label" id="gc-overlay-label">Overlay</div>`;
+}
+
+// ----- Run authentication -----
+$("run-btn").addEventListener("click", runAuthentication);
+
+async function runAuthentication(){
+  if(!state.file) return;
+  $("run-btn").disabled = true;
+  $("latency-label").innerHTML = `<span class="spinner"></span>Analyzing…`;
+  setStep(1, "done"); setStep(2, "active");
+
+  const fd = new FormData();
+  fd.append("file", state.file, state.file.name);
+
+  try{
+    const r = await fetch("/api/predict?gradcam=true", { method: "POST", body: fd });
+    if(!r.ok){
+      const err = await r.json().catch(() => ({detail: r.statusText}));
+      throw new Error(err.detail || `HTTP ${r.status}`);
+    }
+    const j = await r.json();
+    state.lastResult = j;
+    state.refId = genRefId();
+
+    setStep(2, "done"); setStep(3, "done"); setStep(4, "active");
+    renderResult(j);
+    pushHistory(j);
+    $("dl-report").disabled = false;
+  } catch(e){
+    showError(e.message || "Authentication failed.");
+    setStep(2, ""); setStep(3, ""); setStep(4, "");
+    $("latency-label").textContent = "Failed";
+  } finally {
+    $("run-btn").disabled = false;
+  }
+}
+
+function renderResult(j){
+  const isReal = j.verdict.toLowerCase() === "real";
+  const v = $("verdict");
+  v.className = "verdict " + (isReal ? "real" : "fake");
+  $("verdict-badge").textContent = isReal ? "✓" : "✗";
+  $("verdict-title").textContent = isReal ? "AUTHENTIC" : "LIKELY COUNTERFEIT";
+  $("verdict-text").textContent  = isReal
+    ? "The bag appears authentic. (Screening only — not a legal authentication.)"
+    : "The bag shows signs of being counterfeit. Do not purchase without in-person professional authentication.";
+
+  const conf = (j.confidence * 100).toFixed(1) + "%";
+  $("conf-val").textContent = conf;
+  $("conf-val").style.color = isReal ? "var(--real)" : "var(--fake)";
+  $("conf-bar").style.width = conf;
+  const bar = document.querySelector("#confidence .bar");
+  bar.classList.toggle("fake", !isReal);
+  $("confidence").classList.toggle("fake", !isReal);
+
+  $("latency-label").textContent = `Reference · ${state.refId}`;
+
+  // Inspection map
+  if(j.gradcam_overlay){
+    $("gc-original").innerHTML = `<img src="${$("dz-img").src}" alt="orig"/><div class="gc-label">Original Image</div>`;
+    $("gc-heatmap").className  = "gc-box";
+    $("gc-heatmap").innerHTML  = `<img src="${j.gradcam_heatmap}" alt="heatmap"/><div class="gc-label">Inspection Map</div>`;
+    $("gc-overlay").innerHTML  = `<img src="${j.gradcam_overlay}" alt="overlay"/><div class="gc-label">Overlay · ${isReal?"Authentic":"Counterfeit"} ${conf}</div>`;
+  }
+}
+
+function pushHistory(j){
+  const tbody = $("history-body");
+  const empty = tbody.querySelector(".empty-row");
+  if(empty) empty.remove();
+  const ts = new Date().toLocaleString();
+  const isReal = j.verdict.toLowerCase() === "real";
+  const verdictLabel = isReal ? "Authentic" : "Counterfeit";
+  const pe = state.priceEstimate;
+  const priceText = pe
+    ? `${fmtEUR(pe.low)} – ${fmtEUR(pe.high)}`
+    : "—";
+  const tr = document.createElement("tr");
+  tr.innerHTML = `
+    <td><img class="hist-thumb" src="${$("dz-img").src}" alt="thumb"/></td>
+    <td>${ts}</td>
+    <td><span class="pill ${isReal?"real":"fake"}">${verdictLabel}</span></td>
+    <td>${(j.confidence*100).toFixed(1)}%</td>
+    <td>${priceText}</td>
+    <td>${state.file ? state.file.name : ""}</td>`;
+  tbody.prepend(tr);
+}
+
+// ----- Misc actions -----
+$("scroll-gc").addEventListener("click", () => {
+  $("gradcam-section").scrollIntoView({behavior: "smooth"});
+});
+
+// ----- PDF Report -----
+function getRecommendations(isReal, confidence){
+  if(isReal){
+    return [
+      "Initial screening indicates the bag is authentic.",
+      "For high-value purchases, confirm with an in-person professional authenticator (e.g. Bababebi, Entrupy, Real Authentication).",
+      "Request original receipt, box, dust bag, and care card from the seller.",
+      "Inspect stitching, leather grain, hardware engravings, and date stamp in person before completing the transaction.",
+      confidence < 0.85
+        ? "Confidence is moderate — additional inspection is strongly recommended."
+        : "Confidence is high, but a physical inspection remains best practice for premium pieces."
+    ];
+  } else {
+    return [
+      "Initial screening indicates the bag is likely counterfeit.",
+      "Do NOT proceed with the purchase without professional in-person authentication.",
+      "Request additional photos: date stamp, hardware engravings, interior leather tag, and underside of the base.",
+      "If the seller refuses additional verification, treat this as a red flag and walk away.",
+      "Report suspicious listings to the marketplace platform and consider notifying Hermès if appropriate."
+    ];
+  }
+}
+
+async function loadImage(src){
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = reject;
+    img.src = src;
+  });
+}
+
+async function imgToJpeg(src, maxSize=900, quality=0.85){
+  const img = await loadImage(src);
+  const ratio = Math.min(maxSize / img.width, maxSize / img.height, 1);
+  const w = Math.round(img.width * ratio);
+  const h = Math.round(img.height * ratio);
+  const canvas = document.createElement("canvas");
+  canvas.width = w; canvas.height = h;
+  const ctx = canvas.getContext("2d");
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(0, 0, w, h);
+  ctx.drawImage(img, 0, 0, w, h);
+  return canvas.toDataURL("image/jpeg", quality);
+}
+
+$("dl-report").addEventListener("click", async () => {
+  if(!state.lastResult) return;
+  $("dl-report").disabled = true;
+  const originalText = $("dl-report").textContent;
+  $("dl-report").innerHTML = `<span class="spinner"></span>Generating…`;
+
+  try {
+    const j = state.lastResult;
+    const isReal = j.verdict.toLowerCase() === "real";
+    const conf = (j.confidence * 100).toFixed(1);
+    const refId = state.refId || genRefId();
+    const ts = new Date().toLocaleString();
+    const pe = state.priceEstimate; // null if not estimated
+    const fileName = state.file ? state.file.name : "—";
+
+    // Prepare images (compress + ensure JPEG/PNG-safe data URLs)
+    const originalDataUrl = await imgToJpeg($("dz-img").src, 900, 0.85);
+    let heatmapDataUrl = null;
+    if (j.gradcam_overlay){
+      heatmapDataUrl = await imgToJpeg(j.gradcam_overlay, 900, 0.9);
+    }
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ unit: "mm", format: "a4" });
+    const pageW = doc.internal.pageSize.getWidth();
+    const pageH = doc.internal.pageSize.getHeight();
+    const margin = 18;
+
+    // ===== Header band =====
+    doc.setFillColor(74, 57, 25); // accent-dark
+    doc.rect(0, 0, pageW, 26, "F");
+    doc.setTextColor(255, 255, 255);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(18);
+    doc.text("HERMÈS · AUTH", margin, 16);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    doc.text("Authentication Screening Report", pageW - margin, 16, { align: "right" });
+
+    // Reset color
+    doc.setTextColor(26, 26, 26);
+
+    // ===== Meta block =====
+    let y = 36;
+    doc.setFontSize(9);
+    doc.setTextColor(107, 98, 87);
+    doc.text(`Reference: ${refId}`, margin, y);
+    doc.text(`Date: ${ts}`, pageW - margin, y, { align: "right" });
+    y += 4;
+    doc.text(`File: ${fileName}`, margin, y);
+    y += 6;
+    doc.setDrawColor(231, 224, 211);
+    doc.line(margin, y, pageW - margin, y);
+    y += 10;
+
+    // ===== Verdict =====
+    doc.setTextColor(26, 26, 26);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(11);
+    doc.text("VERDICT", margin, y);
+    y += 8;
+
+    // Big verdict box
+    const verdictColor = isReal ? [47, 143, 78] : [192, 57, 43];
+    const verdictBg    = isReal ? [232, 245, 236] : [251, 233, 231];
+    doc.setFillColor(...verdictBg);
+    doc.setDrawColor(...verdictColor);
+    doc.roundedRect(margin, y, pageW - 2*margin, 22, 2, 2, "FD");
+    doc.setTextColor(...verdictColor);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(20);
+    doc.text(isReal ? "AUTHENTIC" : "LIKELY COUNTERFEIT", margin + 6, y + 12);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(11);
+    doc.text(`Confidence: ${conf}%`, pageW - margin - 6, y + 12, { align: "right" });
+    y += 28;
+
+    doc.setTextColor(26, 26, 26);
+
+    // ===== Market value estimate =====
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(11);
+    doc.text("MARKET VALUE ESTIMATE", margin, y);
+    y += 6;
+
+    if (pe) {
+      const q = pe.query || {};
+      const attrLine = [q.model, q.size && `size ${q.size}`, q.leather, q.color,
+                        q.hardware && `${q.hardware} HW`, q.condition]
+                        .filter(Boolean).join(" · ");
+      doc.setFont("helvetica", "italic");
+      doc.setFontSize(9);
+      doc.setTextColor(107, 98, 87);
+      doc.text(attrLine, margin, y);
+      y += 5;
+
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(13);
+      doc.setTextColor(74, 57, 25);
+      const fmt = (n) => "EUR " + Number(n).toLocaleString();
+      doc.text(`${fmt(pe.low)}  -  ${fmt(pe.high)}`, margin, y);
+      y += 5;
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(10);
+      doc.setTextColor(26, 26, 26);
+      doc.text(`Mid-range: ${fmt(pe.mid)}`, margin, y);
+      y += 5;
+
+      doc.setFontSize(8);
+      doc.setTextColor(107, 98, 87);
+      const metaBits = [
+        `Based on ${pe.comparables} comparable listing${pe.comparables===1?"":"s"}`,
+        `multiplier x${pe.multiplier ?? 1}`,
+        "Source: Love Luxury (April 2026)"
+      ];
+      doc.text(metaBits.join(" - "), margin, y, { maxWidth: pageW - 2*margin });
+      y += 4;
+      (pe.notes || []).forEach(n => {
+        doc.text(`Note: ${n}`, margin, y, { maxWidth: pageW - 2*margin });
+        y += 4;
+      });
+      y += 4;
+    } else {
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(10);
+      doc.setTextColor(107, 98, 87);
+      doc.text("Not estimated. Use the Market Value Estimate panel in the web UI to generate a range based on comparable listings.", margin, y, {
+        maxWidth: pageW - 2*margin,
+      });
+      y += 10;
+    }
+    doc.setTextColor(26, 26, 26);
+
+    // ===== Images side-by-side =====
+    doc.setDrawColor(231, 224, 211);
+    const imgW = (pageW - 2*margin - 8) / 2;
+    const imgH = 70;
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(10);
+    doc.text("ORIGINAL", margin, y);
+    doc.text("INSPECTION OVERLAY", margin + imgW + 8, y);
+    y += 3;
+
+    try {
+      doc.addImage(originalDataUrl, "JPEG", margin, y, imgW, imgH, undefined, "FAST");
+    } catch(e){ /* swallow */ }
+    if (heatmapDataUrl){
+      try {
+        doc.addImage(heatmapDataUrl, "JPEG", margin + imgW + 8, y, imgW, imgH, undefined, "FAST");
+      } catch(e){ /* swallow */ }
+    }
+    doc.setDrawColor(231, 224, 211);
+    doc.rect(margin, y, imgW, imgH);
+    doc.rect(margin + imgW + 8, y, imgW, imgH);
+    y += imgH + 5;
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8);
+    doc.setTextColor(107, 98, 87);
+    doc.text("Warmer colors in the overlay indicate areas that most influenced the verdict.", margin, y, {
+      maxWidth: pageW - 2*margin,
+    });
+    y += 8;
+
+    // ===== Recommendations =====
+    doc.setTextColor(26, 26, 26);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(11);
+    doc.text("RECOMMENDATIONS", margin, y);
+    y += 6;
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    const recs = getRecommendations(isReal, j.confidence);
+    recs.forEach((r) => {
+      const lines = doc.splitTextToSize("•  " + r, pageW - 2*margin - 4);
+      if (y + lines.length * 5 > pageH - 30){
+        doc.addPage();
+        y = margin;
+      }
+      doc.text(lines, margin, y);
+      y += lines.length * 5 + 2;
+    });
+
+    // ===== Disclaimer footer =====
+    const footerY = pageH - 18;
+    doc.setDrawColor(231, 224, 211);
+    doc.line(margin, footerY - 6, pageW - margin, footerY - 6);
+    doc.setFont("helvetica", "italic");
+    doc.setFontSize(8);
+    doc.setTextColor(107, 98, 87);
+    doc.text(
+      "Disclaimer: This report is a screening assessment only and does not constitute legal authentication. " +
+      "For high-value transactions, consult a certified Hermès authenticator before purchasing.",
+      margin, footerY,
+      { maxWidth: pageW - 2*margin }
+    );
+
+    doc.save(`hermes-auth-${refId}.pdf`);
+  } catch(err){
+    showError("Could not generate PDF: " + (err.message || err));
+  } finally {
+    $("dl-report").disabled = false;
+    $("dl-report").textContent = originalText;
+  }
+});
+</script>
+
+</body>
+</html>

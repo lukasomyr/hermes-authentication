@@ -21,9 +21,9 @@ from torch.utils.data import DataLoader, Subset
 from torchvision import datasets
 from tqdm import tqdm
 
-import training.config as config
-from training.dataset import get_train_transforms, get_eval_transforms
-from training.model import build_model, unfreeze_backbone, get_optimizer
+import config
+from dataset import get_train_transforms, get_eval_transforms
+from model import build_model, unfreeze_backbone, get_optimizer
 
 
 NUM_FOLDS = 3
@@ -174,13 +174,15 @@ def main():
         val_dataset.samples = [all_samples[i] for i in val_idx]
         val_dataset.targets = [all_labels[i] for i in val_idx]
 
+        # num_workers=0 on macOS to avoid "Too many open files" between folds.
+        # MPS doesn't benefit from pin_memory, so disable it to silence warnings.
         train_loader = DataLoader(
             train_dataset, batch_size=config.BATCH_SIZE,
-            shuffle=True, num_workers=2, pin_memory=True
+            shuffle=True, num_workers=0, pin_memory=False
         )
         val_loader = DataLoader(
             val_dataset, batch_size=config.BATCH_SIZE,
-            shuffle=False, num_workers=2, pin_memory=True
+            shuffle=False, num_workers=0, pin_memory=False
         )
 
         # Fresh model for each fold
