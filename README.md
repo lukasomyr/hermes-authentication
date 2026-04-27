@@ -93,14 +93,15 @@ hermes-authentication/
 
 All 687 images were self-collected — no pre-existing dataset used.
 
-**Authentic (490 images):**
+**Authentic (490 images):** [Google Drive](https://drive.google.com/drive/folders/1Tle1Z6E6P3yc3X4ENSQD40MbeOknUYTG?usp=sharing)
 - Scraped from The RealReal, Rebag, and Vestiaire Collective
 - All listings pre-authenticated by in-house experts
 - Hard-negative mining: custom Playwright scraper identifies false positives on TheRealReal and adds them to training — reduced false positive rate from 78% to 12%
 
-**Counterfeit (197 images):**
+**Counterfeit (197 images):** [Google Drive](https://drive.google.com/drive/folders/1RzQPwNYpsRp5pYvRQ3CVxpKrzkmkwhVh?usp=sharing)
 - Sourced from Reddit (r/RepLadies), DHGate, YouTube comparisons
 - Includes superfake catalog from a replica manufacturer — the hardest possible classification challenge
+
 
 **Preprocessing:**
 ```bash
